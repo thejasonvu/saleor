@@ -20,6 +20,8 @@ from django_countries import countries
 from PIL import Image
 from prices import Money, TaxedMoney
 
+from saleor.graphql.channel.tests.fixtures import channel_USD
+
 from ..account.models import Address, StaffNotificationRecipient, User
 from ..app.models import App
 from ..checkout import utils
@@ -704,7 +706,6 @@ def product(product_type, category, warehouse, channel_USD):
         minimal_variant_price_amount="10.00",
         product_type=product_type,
         category=category,
-        # is_published=True,
     )
 
     ProductChannelListing.objects.create(
@@ -937,7 +938,7 @@ def product_without_category(product):
 
 
 @pytest.fixture
-def product_list(product_type, category, warehouse):
+def product_list(product_type, category, warehouse, channel_USD):
     product_attr = product_type.product_attributes.first()
     attr_value = product_attr.values.first()
 
@@ -950,7 +951,6 @@ def product_list(product_type, category, warehouse):
                     slug="test-product-a",
                     category=category,
                     product_type=product_type,
-                    # is_published=True,
                 ),
                 Product(
                     pk=1487,
@@ -958,7 +958,6 @@ def product_list(product_type, category, warehouse):
                     slug="test-product-b",
                     category=category,
                     product_type=product_type,
-                    # is_published=True,
                 ),
                 Product(
                     pk=1489,
@@ -966,10 +965,22 @@ def product_list(product_type, category, warehouse):
                     slug="test-product-c",
                     category=category,
                     product_type=product_type,
-                    # is_published=True,
                 ),
             ]
         )
+    )
+    ProductChannelListing.objects.bulk_create(
+        [
+            ProductChannelListing(
+                product=products[0], channel=channel_USD, is_published=True,
+            ),
+            ProductChannelListing(
+                product=products[1], channel=channel_USD, is_published=True,
+            ),
+            ProductChannelListing(
+                product=products[2], channel=channel_USD, is_published=True,
+            ),
+        ]
     )
     variants = list(
         ProductVariant.objects.bulk_create(
@@ -1004,6 +1015,24 @@ def product_list(product_type, category, warehouse):
         associate_attribute_values_to_instance(product, product_attr, attr_value)
 
     return products
+
+
+@pytest.fixture
+def product_list_with_many_channels(product_list, channel_PLN):
+    ProductChannelListing.objects.bulk_create(
+        [
+            ProductChannelListing(
+                product=product_list[0], channel=channel_PLN, is_published=True,
+            ),
+            ProductChannelListing(
+                product=product_list[1], channel=channel_PLN, is_published=True,
+            ),
+            ProductChannelListing(
+                product=product_list[2], channel=channel_PLN, is_published=True,
+            ),
+        ]
+    )
+    return product_list
 
 
 @pytest.fixture
@@ -1047,7 +1076,6 @@ def unavailable_product(product_type, category, channel_USD):
         name="Test product",
         slug="test-product-5",
         product_type=product_type,
-        # is_published=False,
         category=category,
     )
     ProductChannelListing.objects.create(
