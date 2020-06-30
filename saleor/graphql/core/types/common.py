@@ -146,6 +146,14 @@ class ProductError(Error):
     code = ProductErrorCode(description="The error code.", required=True)
 
 
+class ProductChannelListingError(ProductError):
+    channels = graphene.List(
+        graphene.NonNull(graphene.ID),
+        description="List of channels IDs which causes the error.",
+        required=False,
+    )
+
+
 class ProductAttributeError(ProductError):
     attributes = graphene.List(
         graphene.NonNull(graphene.ID),
