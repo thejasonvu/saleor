@@ -6,6 +6,7 @@ from datetime import timedelta
 import dj_database_url
 import dj_email_url
 import django_cache_url
+import environ
 import jaeger_client
 import jaeger_client.config
 import sentry_sdk
