@@ -15,6 +15,25 @@ from django_prices.utils.formatting import get_currency_fraction
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.django import DjangoIntegration
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+env_file = os.path.join(BASE_DIR,  ".env")
+
+if not os.path.isfile('.env'):
+    import google.auth
+    from google.cloud import secretmanager_v1beta1 as sm
+
+    _, project = google.auth.default()
+
+    if project:
+        client = sm.SecretManagerServiceClient()
+        path = client.secret_version_path(project, "saleor_settings", "latest")
+        payload = client.access_secret_version(path).payload.data.decode("UTF-8")
+
+        with open(env_file, "w") as f:
+            f.write(payload)
+
+env = environ.Env()
+env.read_env(env_file)
 
 def get_list(text):
     return [item.strip() for item in text.split(",")]
